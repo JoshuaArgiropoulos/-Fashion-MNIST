@@ -1,0 +1,34 @@
+
+# Bytecode
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor configurations
+.idea/
+.vscode/
+*.code-workspace
+
+# Data and model directories (customize as needed)
+data/
+models/
+*.h5
+
+# Log files
+logs/
+*.log
+
+# Image files (if needed)
+*.png
+*.jpg
+*.jpeg
