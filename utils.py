@@ -8,44 +8,49 @@ import torchvision
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import label_binarize
 from itertools import cycle
-
+std = 0.5
+mean = 0.5
 # Mapping of Fashion MNIST classes
 classes = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
            'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
-def show_images(images, labels, classes):
-    images = torchvision.utils.make_grid(images[:4])
-    np_images = images.numpy()
-    plt.figure(figsize=(10,4))
-    plt.imshow(np.transpose(np_images, (1, 2, 0)))
+def show_images(images, labels, classes, std=0.5, mean=0.5):
+    # The input 'images' should be a PyTorch tensor. If it's a NumPy array, convert it back to a tensor.
+    if isinstance(images, np.ndarray):
+        images = torch.tensor(images)
+
+    # torchvision.utils.make_grid expects a tensor of (B, C, H, W)
+    grid = torchvision.utils.make_grid(images)
+    np_images = grid.numpy()  # Convert the grid to a NumPy array for visualization
+
+    # Transpose the images from (C, H, W) to (H, W, C) and unnormalize
+    np_images = np.transpose(np_images, (1, 2, 0))
+    np_images = np_images * std + mean
+    np_images = np.clip(np_images, 0, 1)  # Ensure the image is valid after unnormalization
+
+    # Plotting
+    plt.figure(figsize=(10, 4))
+    plt.imshow(np_images)
     plt.title('Sample Images')
-    plt.xticks([])
-    plt.yticks([])
+    plt.axis('off')
     plt.show()
-    print('Labels: ', ' '.join('%5s' % classes[labels[j]] for j in range(4)))
+
+    # Print labels
+    print('Labels: ', ' '.join(f'{classes[labels[j]]}' for j in range(min(len(labels), 4))))
 
 
 def imshow(img):
-    """
-    Show an image from a torch tensor.
-    """
     npimg = img.numpy()
     plt.figure(figsize=(10, 10))
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
 def show_batch(images, labels):
-    """
-    Display a batch of images and labels.
-    """
     imshow(torchvision.utils.make_grid(images))
     # Print labels
     print(' '.join(f'{classes[labels[j]]}' for j in range(len(labels))))
 
 def plot_training_history(history):
-    """
-    Plot training loss and accuracy history.
-    """
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 2, 1)
     plt.plot(history['train_loss'], label='train loss')
@@ -78,7 +83,7 @@ def show_predictions(images, labels, preds, classes):
     plt.figure(figsize=(10,4))
     for i in range(4):
         plt.subplot(1, 4, i+1)
-        img = images[i] / 2 + 0.5  # Unnormalize
+        img = images[i] * std + mean  # Unnormalize
         npimg = img.numpy()
         plt.imshow(np.transpose(npimg, (1, 2, 0)))
         plt.title(f'Pred: {classes[preds[i]]}\nTrue: {classes[labels[i]]}')
